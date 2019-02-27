@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>执行环境和作用域</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    
+</body>
+<script>
+console.log('这里是执行环境和作用域的基础知识')
+/*
+执行环境，有时也称作环境，它定于了变量或者函数有权访问的其他数据，每个执行环境都有一个与之相关的变量对象，环境中所有变量和函数都保存在这个对象中，
+虽然代码无法访问，但是解析器会在后台使用它。
+全局执行环境是最外围的执行环境，根据宿主环境决定，比如在web浏览器中，全局环境是window对象（后面会详细介绍），代码执行完之后，执行环境将被销毁，
+全局环境在被关闭网页或浏览器之后才会被销毁。
+每个函数都有自己的执行环境，当执行流进入一个函数时，函数的环境被推入环境栈。函数执行完之后，栈将其环境弹出，把控制权交给环境，这就是ecmascript的
+执行流。
+作用域链是保证对执行环境有权访问的所有变量函数的有序访问。作用域链由变量对象组成。作用域链的前端一般是当前执行的代码所在环境的变量对象，全局环境的变量对象始终是作用域链的
+最后一个对象。比如一个环境是函数，那么它的活动对象为环境的变量对象。活动对象最开始只有arguments对象一个变量。作用域的下一个变量对象来自包含环境，
+下一个变量对象来自下一个包含环境，一直延续到全局环境。
+标识符解析是沿着作用域一级级搜索的，从前端开始（正在执行的代码环境）开始向外回溯，直到找到标识符。
+下面是demo
+*/
+var test1string1='blue';
+!function test1func1(){
+    if(test1string1==='blue'){
+        test1string1='red';
+    }else{
+        test1string1='yellow'
+    }
+}();
+console.log(test1string1)//red
+/*
+在这个demo中，作用域链包含两个对象：test1func1的变量对象和全局环境变量对象。可以访问string1就是因为可以在作用域链中找到它。
+*/
+/*
+局部作用域中定义的变量可以在局部环境中与全局变量互换使用，下面是demo
+*/
+var test1string2='blue';
+function test1func2(){
+    var test1string3='red'
+    function test1func3(){
+        var test1string4=test1string3;
+        test1string3=test1string2;
+        test1string2=test1string4;
+    //这里可以访问string4,string2,string3
+    }
+    //这里可以访问string2,string3 
+}
+//这里只能访问string2
+test1func2();
+/*这个demo的作用域链
+window___________________________
+   |                             |
+   |___test1string2              |
+   |                             |
+   |___test1fun2()               |
+         |                       | 
+         |___test1string3        |
+         |                       |
+         |___test1func3()        |
+               |                 |
+               |___test1string4  |
+_________________________________|
+*/
+//每个环境都可以向上访问所有外部环境，但是不可能向下搜索进入环境。
+
+console.log('这里是延长作用链的实验')
+/*
+有些语句可以延长作用链：当执行流进入下列任何一个语句，作用链会得到延长。比如：with语句，try-catch语句的catch块。原理是：在作用域链前端加入
+一个变量对象，其中包含的是被抛出错误对象的声明，下面是demo
+*/
+function test2func1(){
+    var test2string1='?debug=true'
+    with(location){
+      var test2string2=href+test2string1/*这里的href实际为location.href,之前with语句中说过，如果with中没有命名的变量，则从
+      location属性中寻找同名属性代替这个变量。   
+    */
+   }
+    console.log(test2string2)
+    return test2string2
+    
+}
+test2func1();
+//本来在with的外部环境无法访问内部环境，但是却成功了，因为这里url成了作用域链的一部分，这就是延长作用域链。
+/*
+ie8之前的版本中，catch语句中捕捉的错误对象会被添加到执行环境的变量对象，简单说，就是在catch块外也能访问错误对象，ie9修复了这个问题。
+*/
+
+console.log('没有块级作用域的实验')
+/*
+js中没有块级作用域（块级执行环境），下面是demo
+*/
+if(true){
+    var test3num1='blue'
+}
+console.log(test3num1)//blue
+//if或者for执行完之后，变量自动添加到当前执行环境，其他语言会自动销毁
+
+//全局变量和局部变量，下面是demo
+function test3fun1(test3arguments1,test3arguments2){
+    var test3num2=test3arguments1+test3arguments2;
+    return test3num2;
+}
+var test3result1=test3fun1(10,20)
+//console.log(test3num2) 这里会报错，如果把var去掉，test3num3变成全局变量，就可以访问到
+function test3fun2(test3arguments3,test3arguments4){
+    test3num3=test3arguments3+test3arguments4;
+    return test3num3;
+}
+var test3result2=test3fun2(10,20)
+console.log(test3num3) //30
+
+console.log('这里是查询标识符的实验')
+/*
+某环境为了读取或写入一个标识符时，必须通过搜索进行，搜索从局部环境到全局环境，下面是demo。
+*/
+var test4string1='blue';
+function test4func1(){
+    return test4string1
+}
+console.log(test4func1())//blue
+/*
+为了确定test4string1的值，有两步搜索。从test4func1()中搜索，然后到全局环境的变量对象搜索。如果在局部已经搜索到该标识符，
+那么就不会再去下一个变量对象搜索。下面是demo
+*/
+var test4string2='blue';
+function test4func2(){
+    var test4string2='red'
+    return test4string2
+}
+console.log(test4func2())//red
+console.log(window.test4string2)//blue
+//搜索到test4func2()就停止了，如果想调用全局的那个变量，只能使用window.test4string2
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</html>
