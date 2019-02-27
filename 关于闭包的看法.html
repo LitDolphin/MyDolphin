@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    
+</body>
+<script>
+/*
+闭包的意思就是指有权限访问另一个函数作用域中的变量的函数。创建闭包的常见方式就是在一个函数的内部创建另一个函数，下面是demo
+*/
+function creatComparisonFunction(propertyName){
+    return function(object1,object2){   //return函数的意义就是创建一个函数 
+       var value1=object1[propertyName];
+       var value2=object2[propertyName];//这两行就是匿名函数访问外部函数参数，这就是闭包。
+       if(value1<value2){
+           return -1
+       }else if(value1>value2){
+           return 1
+       }else{
+           return 0
+       }
+    };
+}
+/*
+闭包产生原因：
+每当一个函数被调用，会创建一个执行环境以及作用域链，参数来初始化函数的活动对象。一般来说，在函数执行完之后，局部活动对象就会被销毁；
+内存仅仅保存全局作用域。但是，闭包不是这样，在另一个函数内部定义的函数会将外部函数的活动对象添加到他的作用域链中。所以，当外部函数
+执行完毕之后，其活动对象不会被销毁，因为内部匿名函数的作用域链仍然在引用这个活动对象；除非等到内部匿名函数被销毁，外部函数的活动对象
+才会被销毁。
+*/
+var test1func1=creatComparisonFunction('name')            //创建一个比较name的函数
+var test1result1=test1func1({name:'Dolphin'},{name:'Dol'})//调用
+test1func1=null                                           //解除对匿名函数的引用，手动释放内存，闭包一般占用内存较大，可以选择手动释放内存。
+
+
+console.log('闭包与变量的实验')
+/*
+闭包往往只能取得外部函数中任何一个变量的最终值，这与我们的预期不符。下面是demo。
+*/
+function test1func2(){
+    var test1result2=new Array();
+    for(var i=0;i<10;i++){
+        test1result2[i]=function(){
+            return i
+        }
+    }
+    return test1result2
+}
+console.log(test1func2()[0](),test1func2()[6]())//10 10
+/*
+预期的结果是，数组内生成的每个函数都按顺序对应自己的i；但是所有函数运行结果都是10.原因是每个函数的作用域链中都包含着外部函数的活动对象；所以它们
+引用的是同一个i。我们可以通过创建另一个闭包来强制符合预期。
+*/
+function test1func3(){
+    var test1result3=new Array();
+    for(var i=0;i<10;i++){
+        test1result3[i]=function(num){
+           return function(){
+               return num
+           }
+        }(i)                           //这里表示立刻传入i;并且立即运行该函数。
+    }
+    return test1result3
+}
+console.log(test1func3()[3](),test1func3()[9]())//3 9
+
+console.log('关于this对象的实验')
+/*
+大部分情况，this指向所在作用域拥有者。不过匿名函数的执行环境由于具有全局性，一般它的this指向window。
+具体原因是this arguments是两个特殊的变量，内部函数永远不可能访问到外部函数的这两个变量。所以内部函数就忽略了外部函数中的this arguments，直接跳过了。
+下面是demo
+*/
+var test2name1='Dolphin';
+var test2obj1={
+    test2name1:'Dol',
+    getnamefunc1:function(){
+        return function(){
+            return this.test2name1
+        }
+    }
+}
+console.log(test2obj1.getnamefunc1()())//Dolphin
+/*
+只需要将this赋值给内部函数可以访问到的变量就行
+*/
+var test2obj2={
+    test2name1:'Dol',
+    getnamefunc2:function(){
+        var that=this;
+        return function(){
+            return that.test2name1
+        }
+    }
+}
+console.log(test2obj2.getnamefunc2()())//Dol
+
+/*
+另外，this的值也可能意外地改变
+*/
+var test2obj3={
+    test2name1:'Dol',
+    getnamefunc3:function(){
+        return this.test2name1
+    }
+}
+console.log(test2obj3.getnamefunc3())  //Dol
+console.log((test2obj3.getnamefunc3)())//Dol
+console.log((test2obj3.getnamefunc3=test2obj3.getnamefunc3)())//Dolphin
+
+
+</script>
+</html>
