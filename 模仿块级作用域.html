@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+</head>
+<body>
+    
+</body>
+<script>
+/*
+闭包的作用之一，便是模拟块级作用域（或叫私有作用域）。js里本没有块级作用域，也就是说在块语句（比如for循环语句）中定义的变量，
+实际上是在包含函数中而非语句中创建的。
+*/
+function test1func1(test1count1){
+    for(var i=0;i<test1count1;i++){
+        console.log(i)
+    }
+    var i;
+    console.log(i)
+}
+test1func1(2);
+/*
+这个for循环中的i可以在函数内部被调用，而在c java中，i会直接销毁。即使是在循环后再重新声明这个i，也不会改变它的值。
+js不会告诉你是否多次声明了同一变量，会直接对后续的声明视而不见（除了执行变量初始化之外）。匿名函数可以模拟块级作用域并且解决这个问题。
+*/
+(function(){                      
+//这是块级作用域
+})();
+/*
+这是模拟块级作用域的闭包语法，为什么要在函数外面加括号呢。可以将实际的值代替变量，也就可以将函数的值去直接取代函数名。也就是说，括号内
+的其实是取代了函数名，否就得先定义一个函数，再写上xxx();并且函数声明的方式不能加圆括号，所以在匿名函数外部套上括号，转换为函数表达式。
+*/
+
+function test1func2(test1count2){
+       (function(){
+        for(var i=0;i<test1count2;i++){
+        console.log(i)
+    }
+       })();
+
+       try{console.log(i)}catch(e){
+        console.log(e)
+       }
+}
+test1func2(3)         //这样插入一个闭包之后，就会使得i在执行完毕被销毁。
+//在es6中，可以直接用let替换var，达成同样的效果，避免污染全局作用域
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</html>
