@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+</head>
+
+<body>
+    <div id="firstApp">
+        <first-component></first-component>
+        <first-component></first-component>
+        <first-component></first-component>
+    </div>
+
+    <div id="secondApp">
+        <second-component></second-component>
+        <second-component></second-component>
+        <second-component></second-component>
+    </div>
+
+    <div id="thirdApp">
+        <input v-model.lazy="parentMessage" type="text">
+        <!--修饰符.lazy表示在失焦或者回车才会同步数据-->
+        <third-component :message="parentMessage"></third-component>
+    </div>
+
+    <div id="fourthApp">
+        <p>总数：{{total}}</p>
+        <fourth-component @increase="handleGetTotal" @reduce="handleGetTotal"></fourth-component>
+    </div>
+
+    <div id="fifthApp">
+        {{message}}
+        <fifth-component></fifth-component>
+    </div>
+
+    <div id="sixthApp">
+        {{message}}
+        <sixth-component></sixth-component>
+    </div>
+
+    <div id="seventhApp">
+        <seventh-component>
+            <p>分发更多的内容</p>
+            <p>更多分发的内容</p>
+        </seventh-component>
+    </div>
+
+    <div id="eighthApp">
+        <eighth-component>
+            <h2 slot="eighthHeader">标题</h2>
+            <p>正文内容</p>
+            <p>更多的文本内容</p>
+            <div slot="eighthFooter">底部信息</div>
+        </eighth-component>
+    </div>
+
+    <div id="ninthApp">
+        <ninth-component :books="books">
+        <template slot="book" scope="props">
+        <li>{{props.bookName}}</li>
+        </template>
+        </ninth-component>
+    </div>
+
+    <div id="tenthApp">
+         <input type="text" v-focus>
+    </div>
+
+    <div id="eleventhApp">
+         <div v-test:msg.a.b="message"></div>
+    </div>
+
+    <div id="twelfthApp">
+         <div v-go="{msg:'hello',name:'Dolphin'}"></div>
+    </div>
+</body>
+<script>
+    /*
+    组件化开发现在很重要，而组件也是Vue最核心的功能。组件化开发的好处就是能最大程度复用代码。组件有两种，全局组件和局部组件。
+    */
+    Vue.component('first-component', {                                   //全局组件的写法
+        template: '<button @click="counter++">{{counter}}</button>',     //template中写组件的内容
+        data: function () {                                                //data和vue实例中不一样，这里应该写函数
+            return {
+                counter: 0                                               //这里的counter不要引用外部对象才能真正做到独立
+            }
+        }
+    })
+    var firstApp = new Vue({
+        el: '#firstApp'
+    })
+
+
+
+    var secondApp = new Vue({                                            //局部组件的写法，或者也可以把组件内容写在外部对象中再引用
+        el: '#secondApp',
+        components: {
+            'second-component': {
+                template: '<button @click="counter++">{{counter}}</button>',
+                data: function () {
+                    return {
+                        counter: 0
+                    }
+                }
+            }
+        },
+    })
+
+    /*
+    组件之间的通信可以分为父组件向子组件通信（通过props）,子向父组件通信（自定义事件），兄弟组件通信，跨级通信（使用中央事件总线bus）
+    下面是demo
+    */
+    Vue.component('third-component', {
+        props: ['message'],                          //如果无需验证数据，一般使用数组的写法
+        template: '<div>{{"失焦"+message}}</div>'
+    }
+    )
+    var thirdApp = new Vue({
+        el: '#thirdApp',
+        data: {
+            parentMessage: ''                        //这里传进来的数据是可以动态更新的
+        }
+    })
+
+    /*
+    子组件向父组件通信应该使用自定义事件的方法，子组件使用$emit来触发事件，父组件使用$on()来监听子组件的事件，或者父组件直接在子组件的自定义
+    标签上使用v-on来监听自定义事件
+    */
+
+    Vue.component('fourth-component', {         //注意这里的写法，可以选择直接在子组件上监听，也可以在html中的自定义标签中监听事件
+        template: '\
+    <div>\
+    <button @click="handleIncrease">+1</button>\
+    <button @click="handleReduce">-1</button>\
+    </div>',
+        data: function () {
+            return {
+                counter: 0
+            }
+        },
+        methods: {
+            handleIncrease: function () {
+                this.counter++;
+                this.$emit('increase', this.counter);  //接收参数，要监听的事件名
+            },
+            handleReduce: function () {
+                this.counter--;
+                this.$emit('reduce', this.counter)
+            }
+        }
+    })
+
+    var fourthApp = new Vue({
+        el: '#fourthApp',
+        data: {
+            total: 0
+        },
+        methods: {
+            handleGetTotal: function (total) {
+                this.total = total
+            }
+        }
+    })
+
+    /*
+    Vue.js 2.x中，推荐使用一个空Vue实例作为中央事件总线bus.
+    */
+    var bus = new Vue()                                      //首先建立一个bus
+
+    Vue.component('fifth-component', {                      //全局定义一个组件
+        template: '<button @click="handleEvent">传递事件</button>',
+        methods: {
+            handleEvent: function () {
+                bus.$emit('on-message', '来自组件fifth-component的内容') //点击触发事件，通过bus来分发出去
+            }
+        }
+    });
+    var fifthApp = new Vue({
+        el: '#fifthApp',
+        data: {
+            message: ''
+        },
+        mounted: function () {
+            var _this = this;
+            bus.$on('on-message', function (msg) {             //监听来自bus的事件
+                _this.message = msg
+            })
+        }
+    })
+
+    /*
+    除了bus方法，还可以使用父链和子链来实现传递。或者是vuex状态管理。
+    在组件中，使用this.$parent this.$children来沿着父子链访问需要的组件。
+    */
+    Vue.component('sixth-component', {
+        template: '<button @click="handleEvent">通过父链直接修改数据</button>',
+        methods: {
+            handleEvent: function () {
+                this.$parent.message = '来自子组件的内容'      //直接修改父组件的内容
+            }
+        }
+    })
+    var sixthApp = new Vue({
+        el: '#sixthApp',
+        data: {
+            message: ''
+        }
+    })
+
+    /*
+    slot内容分发用于让组件组合使用
+    */
+    Vue.component('seventh-component', {
+        template: '\
+       <div>\
+         <slot>\
+         <p>如果父组件没有插入内容，我将作为默认出现</p>\
+         </slot>\
+       </div>'
+    });                                              //单个slot用法
+    var secondApp = new Vue({
+        el: '#seventhApp'
+    })
+
+    Vue.component('eighth-component', {
+        template: '\
+       <div class="container">\
+       <div class="eighthHeader">\
+           <slot name="eighthHeader"></slot>\
+       </div>\
+       <div class="main">\
+           <slot></slot>\
+       </div>\
+       <div class="eighthFooter">\
+           <slot name="eighthFooter"></slot>\
+       </div>\
+       </div>'                                      //具名slot可以和单个slot共存，具名slot标签用于代替html中slot属性一致的部分
+    })
+    var eighthApp = new Vue({
+        el: '#eighthApp'
+    })
+
+    Vue.component('ninth-component',{
+       props:{
+           books:{
+               type:Array,                         //指的是如果传入数组，必须是以该函数返回
+               default:function(){
+                   return []
+               }
+           }
+       },
+       template:'\
+       <ul>\
+           <slot name="book" v-for="book in books" :book-name="book.name">\
+           </slot>\
+       </ul>\
+       '
+    })
+    
+    var ninthApp=new Vue({
+        el:'#ninthApp',
+        data:{
+            books:[
+                {name:'《Vue.js实战》'},
+                {name:'《Js语言精粹》'},
+                {name:'《Js高级程序设计》'}
+            ]
+        }
+    })
+
+    /*
+    已经学了Vue内置指令，下面学习自定义指令。自定义指令也可以分全局注册和局部注册
+    */
+    Vue.directive('focus',{                 //全局注册
+        inserted:function(el){              //inserted是钩子函数之一
+            el.focus();                     
+        }
+    });
+    var tenthApp=new Vue({
+        el:'#tenthApp'
+    })
+    /*
+    自定义组件是由几个钩子函数构成的;按照需求选择不同的钩子即可。钩子函数可传入的参数：
+    el 指令所绑定的元素，可以用来直接操作DOM
+    binding 一个对象，包含以下属性：name 指令名，不包含v-前缀;
+                                 value 指令的绑定值，例如v-my-directive="1+1",value为2
+                                 oldValue 指令绑定的前一个值，仅在update componentUpdated
+                                 钩子中可使用。无论值是否改变都可以
+                                 expression 绑定值的字符串形式。例如v-my-directive="1+1"
+                                 expression的值是"1+1"
+                                 arg 传给指令的参数。例如v-my-directive：foo,arg的值为foo
+                                 modifiers 一个包含修饰符的对象。例如v-my-directive:foo.bar
+                                 该值是{foo:true,bar:true}
+    vnode Vue编辑器生成的虚拟节点
+    oldVnode 上一个虚拟节点仅在update componentUpdated钩子中可用
+    */
+
+    Vue.directive('test',{
+        bind:function(el,binding,vnode){
+            var keys=[];
+            for(var i in vnode){
+                keys.push(i)
+            }
+            el.innerHTML=
+            'name:'+binding.name+'<br>'+
+            'value:'+binding.value+'<br>'+
+            'expression:'+binding.expression+'<br>'+
+            'argument:'+binding.arg+'<br>'+
+            'modifiers:'+JSON.stringify(binding.modifiers)+'<br>'+
+            'vcode keys:'+keys.join(', ')
+        }
+    })
+    var eleventhApp=new Vue({
+        el:'#eleventhApp',
+        data:{
+            message:'some text'
+        }
+    })
+
+    var twelfthApp=new Vue({
+        el:'#twelfthApp',
+        directives:{                      //注意，局部自定义指令的时候这里是加s的
+            go:{
+                bind:function(el,binding,vnode){
+                    console.log(binding.value.msg);
+                    console.log(binding.value.name)
+                }
+            }
+        }
+    })
+</script>
+
+</html>
