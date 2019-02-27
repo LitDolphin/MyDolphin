@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    
+</body>
+<script>
+/*
+js中没有私有成员的概念，所有对象属性是共有的。但是在函数内部或者定义的创建的变量或者方法或者函数的参数在外部无法访问，它们叫私有变量。
+利用闭包，创建访问这些正常情况无法访问的私有变量的方法叫特权方法。有两种创建特权方法的方式。第一种是在构造函数内部创建闭包。
+*/
+console.log('构造函数方法')
+function Test1func1(){
+    var test1private1=10;
+    function test1func2(){
+        return false;
+    }
+    this.test1func3=function(){
+        test1private1++;
+        return test1func2();
+    }
+}
+try{
+console.log(test1func2())
+}catch(e){
+console.log(e)
+}
+var test1obj1=new Test1func1()
+console.log(test1obj1.test1func3())
+/*
+利用这一特性，还可以隐藏那些不应该被直接修改的数据
+*/
+
+function Test1func4(name){
+    this.getname=function(){
+        return name
+    }
+    this.setname=function(value){
+        name=value
+    }
+}
+var test1obj2=new Test1func4('Dol');
+console.log(test1obj2.getname())//'Dol'
+test1obj2.setname('Dolphin')
+console.log(test1obj2.getname())//Dolphin
+/*
+构造函数的方式也有缺点，因为对于每个实例都会创建一组一样的新方法，利用静态私有变量来实现特权方法可以避免这个问题。
+静态私有变量就像是原型模式，它和构造函数的方式的区别就在于，在一个私有作用域（块级作用域）中创建构造函数，可以增进代码复用率，
+但是每个实例调用这个特权方法也会改变其他实例。
+*/
+console.log('静态私有变量方法');        //在使用块级作用域语法时，一定要在前面一行加；
+
+(function(){
+var test1private2='';                 //私有变量
+Test1func5=function(value){           //构造函数
+    test1private2=value
+}
+Test1func5.prototype.getname=function(){
+    return test1private2
+}
+Test1func5.prototype.setname=function(value){
+    test1private2=value
+}
+})();
+
+var test1obj3=new Test1func5('Dol')
+console.log(test1obj3.getname())//Dol
+test1obj3.setname('Dolphin')
+console.log(test1obj3.getname())//Dolphin
+
+var test1obj4=new Test1func5('Dol')
+console.log(test1obj3.getname())//Dol
+
+console.log('模块模式')
+/*
+模块模式一般用于给单例（只有一个实例的对象）创建私有变量和特权方法，而非给自定义类型服务。
+在需要给单例进行某些初始化，同时又必须维护其私有变量时有用。
+*/
+var test2func1=function(){
+    var test2private1=10;
+    function test2func2(){
+        return false
+    }
+    return{
+        test2public:true,
+        test2func3:function(){
+            test2private1++;
+            return test2func2()
+        }
+    }
+}();
+/*
+这是一个返回对象的匿名函数，将对象字面量作为函数的值返回。本质上讲，这个对象字面量定义的时单例（只有一个实例的对象）的公共接口。
+比如在webapp中，需要一个单例来管理应用程序级的信息。比如管理组件，下面是demo。
+*/
+var test2func4=function(){
+    //私有变量和函数
+    var components=new Array();
+    //初始化
+    components.push(new BaseComponent());
+    //公共接口
+    return{
+        getComponentCount:function(){
+            return components.length
+        },                                        //返回组件数目
+        registerComponent:function(component){    //注册新组件 
+           if(typeof component =='object'){
+               components.push(component)
+           }
+        }
+    }
+}();
+
+
+console.log('增强的模块模式')
+/*
+增强的模块模式和模块模式一样，都是给单例创建私有变量的方法。不同在于，创建的对象必须是某种类型的实例。
+*/
+var test2func5=function(){
+    var test2private2=10;
+    function test2func6(){
+        return false
+    }
+    var object=new CustomType();
+
+    object.test2public=true,
+    object.test2func7=function(){
+            test2private2++;
+            return test2func6()
+        }
+    return object;
+}();
+
+
+
+
+
+</script>
+</html>
