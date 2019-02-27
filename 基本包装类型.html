@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+</body>
+<script>
+    /*
+    为了便于操作基本类型值。ecmascript还提供了三个特殊的引用类型值：Number,String,Boolean。
+    每当读取一个基本类型值的时候，就会创建一个相应的基本包装类型的对象。否则，基本类型值本身
+    是没有方法的。下面是创建demo。
+    */
+    var test1string1 = 'abc';
+    var test1string2 = test1string1.substring(2)
+/*
+在操作中，其实后台已经完成了一系列处理。在第二行代码访问s1时，访问过程处于一种读取模式，
+在该模式z中读取字符串时，后台自动完成以下处理。
+1.创建一个String的实例      var test1string1=new String('abc')
+2.在实例上调用这个方法       var test1string1=test1string1.substring(2)
+3.销毁这个实例              var test1string1=null
+
+引用类型与基本包装类型的主要区别就在于生存期。如果是后台非显示创建的基本包装类型，那么它只存在于一行代码执行的那一瞬间，之后立即销毁。
+如果是用new显示地创建对象，在执行流离开当前作用于之前都会被保存在内存中。
+*/
+var test1string3='hello'
+test1string3.color='red'
+console.log(test1string3.color)//undefined
+//如果是不显式地创建基本包装类型，那么在执行第二行代码之后立马被销毁
+var test1string4=new String('hello')
+test1string4.color='blue'
+console.log(test1string4.color,typeof test1string4)//blue object
+/*
+这里显式地创建基本包装类型，就可以给这个String的实例添加属性了。但是并不推荐这个办法，除非在绝对必要的情况下再这样做，因为这样让人分不清到底
+是在处理基本类型值还是引用类型值。对基本包装类型值使用typeof()会返回object,转换为布尔值为true。
+同样，除了使用String,Boolean,Number构造以外，还可直接使用Object构造。
+*/
+var test1string5=new Object('world')
+console.log(test1string5 instanceof String)//true
+
+console.log('Boolean基本包装类型')
+/*
+其实Boolean会给人造成误会，因为所有基本包装类型如果转换为布尔值，会是true。
+*/
+var test2bool1=new Boolean(false)
+console.log(test2bool1 && true,false && true)//true false
+
+console.log('Number基本包装类型')
+/*
+除了valueof(),toString(),toLocaleString(),Number对象还增加了toFixed()方法，传入的参数用以指定小数位。toExponential用以指数表示法,接收的
+参数指定结果中的小数位数。如果想要使用最合适的格式，就应该使用toPrecision()方法。它会看情况而调用toFixed或者toExponential()方法。它的参数表示
+所有数字的位数。下面是demo。
+*/
+var test2number1=99;
+console.log(test2number1.toFixed(2),test2number1.toExponential(1),test2number1.toExponential(0),test2number1.toPrecision(1))
+//99.00 9.9e+1 1e+1 1e+1  这里注意，三个参数的不同。
+//记住，Number对象是Number类型的实例，基本类型的数值则不是。
+
+console.log('String基本包装类型')
+/*
+String类型有许多办法。
+*/
+var test3string1='hello world'
+console.log(test3string1.length)             //11
+
+/*
+字符方法：用以访问特定字符的方法：charAt()和charCodeAt()。这两个方法都接收一个参数，即基于0的字符位置。前者以单字符串的形式返回给定位置的那个字符。
+下面是demo。
+*/
+var test4string1='hello world'
+console.log(test4string1.charAt(1))//e
+//如果想要输出的不是字符而是字符编码，那么就要后者了。
+console.log(test4string1.charCodeAt(1))//101
+//除了上面两种方法之外，还有[]方法。
+console.log(test4string1[1])//e
+/*
+字符串操作方法：concat(),slice(),substr(),substring()。且不改变原始字符串。
+*/
+//concat()用于拼接字符串，返回拼接后的字符串。
+var test4string2='hello',
+    test4string3='world';
+    var test1start=Date.now()
+console.log(test4string2.concat(' ',test4string3,'！'),test4string2)//hello world!    hello
+//+操作符使用更加广泛，且效果一样
+console.log(test4string2+' '+test4string3+'！')//hello world!
+
+/*
+后三个方法是基于子字符串创建新字符串的方法。都会返回被操作字符串的一个子字符串。且都接收一个或连两个参数。第一个参数指定子字符串开始的位置，
+第二个参数表示字符串到哪里结束。slice(),substring()的第二个参数指的是子字符串后面的位置。substr()的第二个参数指的是返回字符的个数。
+如果没有传递第二个参数，将会以字符串末尾为结束位置。下面是demo。
+*/
+var test5string1='hello world'
+console.log(test5string1.slice(3))//lo world
+console.log(test5string1.slice(3,7))//lo w
+console.log(test5string1.substring(3))//lo world
+console.log(test5string1.substring(3,7))//lo w
+console.log(test5string1.substr(3))//lo world
+console.log(test5string1.substr(3,7))//lo worl
+/*
+显然substr()返回7个字符，需要注意的在于：另两个方法的参数指定的是一个前闭后开区间。比如第一个参数3指的是位置3，即第四个字符'l'，7指的是第8个字符'o'；
+单数返回结果并不包括o,这需要注意。
+如果传递给它们负值，那么结果就不一样了。
+*/
+console.log(test5string1.slice(-3))//rld slice()会将传入的负值与字符串长度相加，所以-3+11=8，从第八位开始。
+console.log(test5string1.slice(3,-4))//lo w  从第四位开始到第七位
+console.log(test5string1.slice(-3,-4))//打印不出来，-3+11=8，不存在8到-4位的数
+console.log(test5string1.substr(-3))//substr()方法将第一个参数加上字符串的长度，而将负的第二个参数转化为0
+console.log(test5string1.substr(-3,-4))//打印不出来，为什么呢，11+-3=8，第二位是0，没有从第8位到第0位的字符串
+console.log(test5string1.substring(-3))//substring()会把所有的负数转化为0
+
+/*
+字符串位置方法：indexOf() lastIndexOf()这两个方法都是从一个字符串中搜索给定的字符串，然后返回字符串位置。如果没有找到，返回-1。前者从头向尾搜索字符串，
+后者从后往前搜索。返回的结果都是从前往后的位数。
+*/
+var test6string1='hello world'
+console.log(test6string1.indexOf('o'))//4
+console.log(test6string1.lastIndexOf('o'))//7
+//可以提供第二个参数用以指定从第几位开始搜索，下面是demo。
+console.log(test6string1.indexOf('o',5))//7  指定从第五位开始搜索,忽略5位之后的字符串
+console.log(test6string1.lastIndexOf('o',5))//4 指定从第五位开始搜索，忽略5位之前的字符串
+//可以通过这个特性来找到所有匹配的字符。
+var test6string2='Dolphin is who keep alone forever'
+var test6arr1=new Array()
+var test6string3=test6string2.indexOf('o')
+while(test6string3>-1){
+    test6arr1.push(test6string3)
+    test6string3=test6string2.indexOf('o',test6string3+1)
+}
+console.log(test6arr1)//[1,13,2,27]
+
+/*
+trim()方法，这个方法会创建一个字符串的副本，删除前缀或者后置的空格，然后返回结果。IE9+ Firefox3.5+ Safari5+ Chrome支持它。
+还有trimLeft() trimRight()分别用于删除字符串开头和末尾的空格。Firefox3.5+ Safari5+ Chrome8+支持它们。
+*/
+var test7string1='     hello   world    '
+console.log(test7string1.trim())//注意，中间的空格不会被移除
+console.log(test7string1.trimRight())//只有末尾的空格被移除了。
+
+/*
+字符串大小写转换方法
+toLowerCase() toLocaleLowerCase() toUpperCase() toLocaleUpperCase() 
+toLowerCase()用以转化为小写，toUpperCase()用以转化为大写，另两个用途一样，但是针对使用地区。
+*/
+var test8string='Hello World'
+console.log(test8string.toLowerCase())//hello world
+console.log(test8string.toUpperCase())//HELLO WORLD
+
+/*
+字符串的模式匹配方法
+match() search() 
+*/
+/*
+第一个方法本质上相当于正则的exec(),直接收一个参数，正则表达式或者一个RegExp对象。返回一个数组
+下面是demo。
+*/
+var test9text1='cat,bat,sat,fat'
+var test9reg1=/.at/
+console.log(test9text1.match(test9reg1).index,test9text1.match(test9reg1)[0])//0 cat 
+
+/*
+search()和第一种方法一样，但是返回的是索引值。如果找不到，返回-1。
+*/
+console.log(test9text1.search(/at/))//1
+
+/*
+replace(),用以简化替代子字符串的操作。接受两参数，第一个是RegExp对象或者一个字符串(注意前两个方法只接受正则表达式，这里的字符串不会转化为正则)，
+第二个参数可以是一个字符串或者是一个函数。如果第一个参数是字符串，那么只会替代第一个子字符串。要想替代所有子字符串，第一个参数必须是正则表达式。
+且要指定全局g标志。下面是demo。
+*/
+var test9text2='cat,bat,sat,fat'
+var test9string2='at'
+var test9reg2=/at/g
+console.log(test9text2.replace(test9string2,'ar'))//car,bat,sat,fat
+console.log(test9text2.replace(test9reg2,'ar'))   //car,bar,sar,far
+
+/*
+如果第二个参数是字符串，那么还可以使用一些特殊的字符序列，将正则表达式操作得到的值插入结果字符串中。下面列出了ecmascript提供的这些特殊的字符序列
+字符序列                                                                                  替换文本
+$$                                                                                          $
+$&                                                                      匹配整个模式的子字符串，与RegExp.lastMatch的值相同
+$'                                                                      匹配的子字符串之前的子字符串。与RegExp.leftContext的值相同
+$`                                                                      匹配的子字符串之前的子字符串。与RegExp.rightContext的值相同
+$n                         匹配的第n个捕获组的子字符串，其中n等于0~9。比如$1是匹配的第一个捕获组的子字符串。如果没有定义捕获组，则使用空字符串。
+下面是demo
+*/
+var test9text3='cat,bat,sat,fat'
+var test9result3=test9text3.replace(/(.at)/g,'word($1)')
+console.log(test9result3) //word(cat),word(bat),word(sat),word(fat)
+
+/*
+replace()方法的第二个参数设置为函数，可以实现更加精密的操作。需要向函数中传递三个以上参数：模式的匹配项目，第一个捕获组的匹配项，
+第二个捕获组的匹配项。。。。。。模式的匹配项在字符串中的位置，原始字符串。如果只有一个匹配项，不需要传入匹配项作为参数。
+下面是demo
+*/
+function test9func1(test9text4){
+    return test9text4.replace(/[<>"&]/g,function(test9match4,test9reg4,test9text5){
+           switch(test9match4){
+                 case "<":
+                      return "&lt;";
+                 case ">":
+                      return "&gt;";
+                 case "&":
+                      return "&amp;";
+                 case "\"":
+                      return "&quot;";
+           }
+
+    });
+}
+console.log(test9func1("<p class=\"greeting\">Hello world!</p>"))
+/*
+&lt;p class=&quot;greeting&quot;&gt;Hello world!&lt;/p&gt;
+这里定义了一个函数，能够转义4个字符。
+*/
+
+/*
+split();这个方法基于指定的分隔符将一个字符串将一个字符串分割成多个子字符串，并将结果放在一个数组中。分隔符可以是字符串，也可以是
+一个正则对象。传递的第二个参数可以接受可选的第二个参数，用以指定数组的大小。
+*/
+var test10text1='red,&quotblue,&quotgreen,&quotyellow'//这里的分隔符为,&quot
+console.log(test10text1.split(',&quot'))              //["red", "blue", "green", "yellow"]
+console.log(test10text1.split(',&quot','2'))          //["red", "blue"]
+console.log(test10text1.split(/[^\,]+/))              //["", ",", ",", ",", ""] 这个正则表示取得包含逗号的数组
+/*
+split()方法在各个浏览器中表现不一样，要多做测试。详情见第129页。
+*/
+
+/*
+localeCompare()方法，用以比较两个字符串，并返回下面中的一个：
+如果字符串在字母表中应该排在字符串参数之前，则返回一个负数，大多数情况为-1，具体的值要视实现而定。
+如果相等，返回0
+如果字符串在字母表中应该排在字符串参数之后，则返回一个正数，大多数情况为1，具体的值要视实现而定。
+下面是demo。
+*/
+var test11string1='yellow'
+console.log(test11string1.localeCompare('car'))//1
+console.log(test11string1.localeCompare('doooooor'))//1
+console.log(test11string1.localeCompare('zoo'))//-1
+console.log(test11string1.localeCompare('you'))//-1
+console.log(test11string1.localeCompare('yandmeou'))//1
+console.log(test11string1.localeCompare('yellox'))//-1
+console.log(test11string1.localeCompare('Yellow'))//-1
+/*
+从中可以看出比较规则，和字符串长度无关，如果第一个字符处于相同位置，就比较第二个，由此类推。
+另外注意，在美国，大写字符是排在小写字符之前的。中国是相反的。
+*/
+//由于返回的值由实现而定，所以为了在所有的环境都能正确运行，应该使用以下函数
+function test11func1(test11string2){
+         var test11result1=test11string1.localeCompare(test11string2)
+         if(test11result1<0){
+             console.log("比'yellow'靠后")
+         }else if(test11result1>0){
+             console.log("比'yellow'靠前")
+         }else{
+             console.log('一样')
+         }
+}
+test11func1('yellow')//一样
+test11func1('you')   //比yellow靠后
+test11func1('acar')  //比yellow靠前
+test11func1('Yellow')//比yellow靠后
+
+/*
+fromCharCode()方法，这个方法用于接收一个或者多个字符编码转换为一个字符串，与charCodeAt()执行的相反的操作。
+下面是demo。
+*/
+console.log(String.fromCodePoint(104,101,108,108,111))//hello
+/*
+尽管绝大部分常用的 Unicode 值可以用一个 16-bit 数字表示（正如 JavaScript 标准化过程早期），并且对于绝大部分值 fromCharCode() 
+返回一个字符（即对于绝大部分字符 UCS-2 值是 UTF-16 的子集），但是为了处理所有的 Unicode 值（至 21 bits），只用 fromCharCode() 是不足的。
+由于高位编码字符是用两个低位编码（lower value）表示形成的一个字符，因此String.fromCodePoint() （ES6 规范的一部分）被用来返回这样一对低位编码，
+从而可以完全表示这些高位编码字符。
+*/
+
+/*
+HTML方法
+早期的web浏览器提供商觉察到了使用js动态格式化HTML的需求，不过尽量不要使用这些方法，因为这些标记通常无法表达语义。
+方法                                       输出结果
+anchor(name)                               <a name='name'>string</a>
+big()                                      <big>string</big>
+bold()                                     <b>string</b>
+fixed()                                    <tt>string</tt>
+其他在130页
+*/
+
+</script>
+
+</html>
